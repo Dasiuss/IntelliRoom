@@ -26,6 +26,7 @@ int buttonWas = 0;
 long buttonWhen = millis();
 
 //funcs
+void handleMouseRoll();
 void handleTimeLed();
 void handleTimer();
 void handlePirLed();
@@ -38,6 +39,7 @@ void setup() {
   pinMode(timeLedPin, OUTPUT);
   pinMode(pirLedPin, OUTPUT);
   pinMode(buttonPin, INPUT_PULLUP);
+  prepareMouseRoll();
 }
 
 
@@ -48,7 +50,12 @@ void loop() {
   handlePir();
   handlePirLed();
   handleButton();
+  handleMouseRoll();
   delay(50);
+}
+
+void handleMouseRoll(){
+    timeLedTargetPwm += getRollMove();
 }
 
 void handleButton() {
@@ -79,6 +86,7 @@ void handleTimer() {
   }
 }
 
+//TODO change to checking millis()
 void handleTimeLed() {
   if (timeLedPwm < timeLedTargetPwm) {
     timeLedPwm += timeLedUpSpeed;
@@ -99,6 +107,7 @@ void handlePir() {
   }
 }
 
+//TODO change to checking millis()
 void handlePirLed() {
   if (pirLedPwm < pirLedTargetPwm) {
     pirLedPwm += pirLedUpSpeed;
