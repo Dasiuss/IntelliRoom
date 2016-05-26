@@ -38,6 +38,7 @@ void setup() {
   pinMode(timeLedPin, OUTPUT);
   pinMode(pirLedPin, OUTPUT);
   pinMode(buttonPin, INPUT_PULLUP);
+  prepareMouseRoll();
 }
 
 
