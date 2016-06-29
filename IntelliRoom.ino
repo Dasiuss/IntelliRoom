@@ -9,19 +9,22 @@ int buttonPin = 2;
 int pirLedMaxPwm = 255;
 int timeLedMaxPwm = 255;
 
-int timeLedUpSpeed = 2;
-int timeLedDownSpeed = 1;
-int pirLedUpSpeed = 4;
-int pirLedDownSpeed = 1;
+int timeLedUpSpeed = 40;
+int timeLedDownSpeed = 20;
+int pirLedUpSpeed = 80;
+int pirLedDownSpeed = 20;
 
 int timeLedIntervalToAdd = 30000;
 
 //vars
 int timeLedPwm = 0;
 int timeLedTargetPwm = 0;
-long tileLedEndTime = millis();
+bool timeLedIsOn = false;
+long timeLedEndTime = millis();
+long timeLedWhen = millis();
 int pirLedPwm = 0;
 int pirLedTargetPwm = 0;
+long pirLedWhen = millis();
 int buttonWas = 0;
 long buttonWhen = millis();
 
@@ -45,13 +48,15 @@ void setup() {
 
 
 void loop() {
-  handleTimeLed();
-  handleTimer();
   handlePir();
   handlePirLed();
+  
+  handleTimer();
+  handleTimeLed();
+  
   handleButton();
-  handleMouseRoll();
-  delay(50);
+//  handleMouseRoll();
+delay(50);
 }
 
 void handleMouseRoll(){
@@ -72,31 +77,34 @@ void handleButton() {
 }
 
 void onClick() {
-  if (tileLedEndTime < millis()) {
-    tileLedEndTime = millis();
+  if(!timeLedIsOn && timeLedEndTime < millis()){//off and no timer
+    timeLedIsOn=true;
+  }else if (timeLedIsOn){//was on - turn on timer
+    timeLedIsOn=false;
+    timeLedEndTime = millis();
   }
-  tileLedEndTime += timeLedIntervalToAdd;
+  timeLedEndTime += timeLedIntervalToAdd;
 }
 
 void handleTimer() {
-  if (tileLedEndTime < millis()) { //koniec czasu
+  if (timeLedEndTime < millis() && !timeLedIsOn) { //end of time and not turned on
     timeLedTargetPwm = 0;
   } else {
     timeLedTargetPwm = timeLedMaxPwm;
   }
 }
 
-//TODO change to checking millis()
 void handleTimeLed() {
+  float period = (float)(millis() - timeLedWhen) / 1000;
   if (timeLedPwm < timeLedTargetPwm) {
-    timeLedPwm += timeLedUpSpeed;
+    timeLedPwm += timeLedUpSpeed * period;
     if (timeLedPwm > timeLedTargetPwm)timeLedPwm = timeLedTargetPwm;
-    analogWrite(timeLedPin, timeLedPwm);
   } else if (timeLedPwm > timeLedTargetPwm) {
-    timeLedPwm -= timeLedDownSpeed;
+    timeLedPwm -= timeLedDownSpeed * period;
     if (timeLedPwm < timeLedTargetPwm)timeLedPwm = timeLedTargetPwm;
-    analogWrite(timeLedPin, timeLedPwm);
   }
+  analogWrite(timeLedPin, timeLedPwm);
+  timeLedWhen = millis();
 }
 
 void handlePir() {
@@ -107,15 +115,16 @@ void handlePir() {
   }
 }
 
-//TODO change to checking millis()
 void handlePirLed() {
+  float period = (float)(millis() - pirLedWhen) / 1000;
   if (pirLedPwm < pirLedTargetPwm) {
-    pirLedPwm += pirLedUpSpeed;
+    pirLedPwm += pirLedUpSpeed * period;
     if (pirLedPwm > pirLedTargetPwm) pirLedPwm = pirLedTargetPwm;
   } else if (pirLedPwm > pirLedTargetPwm) {
-    pirLedPwm -= pirLedDownSpeed;
+    pirLedPwm -= pirLedDownSpeed * period;
     if (pirLedPwm < pirLedTargetPwm) pirLedPwm = pirLedTargetPwm;
   }
   analogWrite(pirLedPin, pirLedPwm);
+  pirLedWhen = millis();
 }
 
